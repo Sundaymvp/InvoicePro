@@ -5,7 +5,7 @@ import com.sundaymvp.invoice_api.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 @Service
 public class CustomerService {
@@ -21,31 +21,37 @@ public class CustomerService {
     }
 
     public Customer getCustomerById(Long id) {
-        Optional<Customer> customer = customerRepository.findById(id);
-        return customer.orElse(null);
+        Objects.requireNonNull(id, "id must not be null");
+
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
     public Customer saveCustomer(Customer customer) {
+        Objects.requireNonNull(customer, "customer must not be null");
+
         return customerRepository.save(customer);
     }
 
     public Customer updateCustomer(Long id, Customer updatedCustomer) {
 
-        Customer customer = customerRepository.findById(id).orElse(null);
+        Objects.requireNonNull(id, "id must not be null");
+        Objects.requireNonNull(updatedCustomer, "updatedCustomer must not be null");
 
-        if (customer != null) {
-            customer.setName(updatedCustomer.getName());
-            customer.setEmail(updatedCustomer.getEmail());
-            customer.setPhone(updatedCustomer.getPhone());
-            customer.setAddress(updatedCustomer.getAddress());
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-            return customerRepository.save(customer);
-        }
+        customer.setName(updatedCustomer.getName());
+        customer.setEmail(updatedCustomer.getEmail());
+        customer.setPhone(updatedCustomer.getPhone());
+        customer.setAddress(updatedCustomer.getAddress());
 
-        return null;
+        return customerRepository.save(customer);
     }
 
     public void deleteCustomer(Long id) {
+        Objects.requireNonNull(id, "id must not be null");
+
         customerRepository.deleteById(id);
     }
 }
