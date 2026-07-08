@@ -1,4 +1,4 @@
-package com.sundaymvp.invoice_api.security;
+package com.sundaymvp.invoice_api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +18,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic(Customizer.withDefaults())
-            .formLogin(Customizer.withDefaults());
+            .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
