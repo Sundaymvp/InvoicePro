@@ -1,6 +1,7 @@
 package com.sundaymvp.invoice_api.service;
 
 import com.sundaymvp.invoice_api.entity.Product;
+import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
 import com.sundaymvp.invoice_api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,25 +22,27 @@ public class ProductService {
     }
 
     public Product getProductById(Long id) {
-        Objects.requireNonNull(id, "id must not be null");
+
+        Objects.requireNonNull(id, "Product id must not be null");
 
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
     }
 
     public Product saveProduct(Product product) {
-        Objects.requireNonNull(product, "product must not be null");
+
+        Objects.requireNonNull(product, "Product must not be null");
 
         return productRepository.save(product);
     }
 
     public Product updateProduct(Long id, Product updatedProduct) {
 
-        Objects.requireNonNull(id, "id must not be null");
-        Objects.requireNonNull(updatedProduct, "updatedProduct must not be null");
+        Objects.requireNonNull(id, "Product id must not be null");
+        Objects.requireNonNull(updatedProduct, "Updated product must not be null");
 
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         product.setName(updatedProduct.getName());
         product.setDescription(updatedProduct.getDescription());
@@ -56,7 +59,8 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
-        Objects.requireNonNull(id, "id must not be null");
+
+        Objects.requireNonNull(id, "Product id must not be null");
 
         productRepository.deleteById(id);
     }

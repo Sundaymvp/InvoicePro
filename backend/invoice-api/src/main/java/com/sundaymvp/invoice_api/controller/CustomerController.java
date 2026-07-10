@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.controller;
 
+import com.sundaymvp.invoice_api.dto.response.CustomerResponse;
 import com.sundaymvp.invoice_api.entity.Customer;
 import com.sundaymvp.invoice_api.service.CustomerService;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public Customer getCustomer(@PathVariable Long id) {
+    public CustomerResponse getCustomer(@PathVariable Long id) {
         return customerService.getCustomerById(id);
     }
 
