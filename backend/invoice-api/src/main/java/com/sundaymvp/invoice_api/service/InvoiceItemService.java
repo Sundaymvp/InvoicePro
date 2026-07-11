@@ -23,15 +23,18 @@ public class InvoiceItemService {
     private final InvoiceItemRepository invoiceItemRepository;
     private final InvoiceRepository invoiceRepository;
     private final ProductRepository productRepository;
+    private final InvoiceService invoiceService;
 
     public InvoiceItemService(
             InvoiceItemRepository invoiceItemRepository,
             InvoiceRepository invoiceRepository,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            InvoiceService invoiceService) {
 
         this.invoiceItemRepository = invoiceItemRepository;
         this.invoiceRepository = invoiceRepository;
         this.productRepository = productRepository;
+        this.invoiceService = invoiceService;
     }
 
     public List<InvoiceItemResponse> getAllInvoiceItems() {
@@ -83,11 +86,15 @@ public class InvoiceItemService {
 
         invoiceItem.setLineTotal(lineTotal);
 
+        // Reduce stock
         product.setQuantity(product.getQuantity() - request.getQuantity());
 
         productRepository.save(product);
 
         invoiceItemRepository.save(invoiceItem);
+
+        // Automatically update invoice total
+        invoiceService.recalculateInvoiceTotal(invoice.getId());
 
         return InvoiceItemMapper.toResponse(invoiceItem);
     }
@@ -112,10 +119,10 @@ public class InvoiceItemService {
         // Restore previous stock
         product.setQuantity(product.getQuantity() + invoiceItem.getQuantity());
 
-        // Validate new quantity
+        // Validate new stock
         validateStock(product, request.getQuantity());
 
-        // Deduct new quantity
+        // Deduct new stock
         product.setQuantity(product.getQuantity() - request.getQuantity());
 
         invoiceItem.setInvoice(invoice);
@@ -136,6 +143,9 @@ public class InvoiceItemService {
 
         invoiceItemRepository.save(invoiceItem);
 
+        // Automatically update invoice total
+        invoiceService.recalculateInvoiceTotal(invoice.getId());
+
         return InvoiceItemMapper.toResponse(invoiceItem);
     }
 
@@ -154,11 +164,16 @@ public class InvoiceItemService {
 
         productRepository.save(product);
 
+        Long invoiceId = invoiceItem.getInvoice().getId();
+
         invoiceItemRepository.delete(invoiceItem);
+
+        // Automatically update invoice total
+        invoiceService.recalculateInvoiceTotal(invoiceId);
     }
 
     /**
-     * Validate available stock
+     * Validate available stock.
      */
     private void validateStock(Product product, Integer quantity) {
 
