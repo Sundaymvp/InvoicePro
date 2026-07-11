@@ -5,6 +5,7 @@ import com.sundaymvp.invoice_api.dto.response.InvoiceItemResponse;
 import com.sundaymvp.invoice_api.entity.Invoice;
 import com.sundaymvp.invoice_api.entity.InvoiceItem;
 import com.sundaymvp.invoice_api.entity.Product;
+import com.sundaymvp.invoice_api.exception.InsufficientStockException;
 import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
 import com.sundaymvp.invoice_api.mapper.InvoiceItemMapper;
 import com.sundaymvp.invoice_api.repository.InvoiceItemRepository;
@@ -64,6 +65,8 @@ public class InvoiceItemService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Product not found"));
 
+        validateStock(product, request.getQuantity());
+
         InvoiceItem invoiceItem = new InvoiceItem();
 
         invoiceItem.setInvoice(invoice);
@@ -79,6 +82,10 @@ public class InvoiceItemService {
                         + request.getTax();
 
         invoiceItem.setLineTotal(lineTotal);
+
+        product.setQuantity(product.getQuantity() - request.getQuantity());
+
+        productRepository.save(product);
 
         invoiceItemRepository.save(invoiceItem);
 
@@ -102,6 +109,15 @@ public class InvoiceItemService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Product not found"));
 
+        // Restore previous stock
+        product.setQuantity(product.getQuantity() + invoiceItem.getQuantity());
+
+        // Validate new quantity
+        validateStock(product, request.getQuantity());
+
+        // Deduct new quantity
+        product.setQuantity(product.getQuantity() - request.getQuantity());
+
         invoiceItem.setInvoice(invoice);
         invoiceItem.setProduct(product);
         invoiceItem.setQuantity(request.getQuantity());
@@ -116,6 +132,8 @@ public class InvoiceItemService {
 
         invoiceItem.setLineTotal(lineTotal);
 
+        productRepository.save(product);
+
         invoiceItemRepository.save(invoiceItem);
 
         return InvoiceItemMapper.toResponse(invoiceItem);
@@ -129,6 +147,23 @@ public class InvoiceItemService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Invoice item not found"));
 
+        Product product = invoiceItem.getProduct();
+
+        // Restore stock
+        product.setQuantity(product.getQuantity() + invoiceItem.getQuantity());
+
+        productRepository.save(product);
+
         invoiceItemRepository.delete(invoiceItem);
+    }
+
+    /**
+     * Validate available stock
+     */
+    private void validateStock(Product product, Integer quantity) {
+
+        if (quantity > product.getQuantity()) {
+            throw new InsufficientStockException("Insufficient stock available.");
+        }
     }
 }
