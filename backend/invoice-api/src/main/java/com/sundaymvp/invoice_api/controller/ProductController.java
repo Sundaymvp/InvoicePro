@@ -1,5 +1,7 @@
 package com.sundaymvp.invoice_api.controller;
 
+import com.sundaymvp.invoice_api.dto.request.ProductRequest;
+import com.sundaymvp.invoice_api.dto.response.ProductResponse;
 import com.sundaymvp.invoice_api.entity.Product;
 import com.sundaymvp.invoice_api.service.ProductService;
 import org.springframework.web.bind.annotation.*;
@@ -22,19 +24,21 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product getProduct(@PathVariable Long id) {
+    public ProductResponse getProduct(@PathVariable Long id) {
         return productService.getProductById(id);
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return productService.saveProduct(product);
+    public Product createProduct(@RequestBody ProductRequest request) {
+        return productService.saveProduct(request);
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id,
-                                 @RequestBody Product product) {
-        return productService.updateProduct(id, product);
+    public Product updateProduct(
+            @PathVariable Long id,
+            @RequestBody ProductRequest request) {
+
+        return productService.updateProduct(id, request);
     }
 
     @DeleteMapping("/{id}")

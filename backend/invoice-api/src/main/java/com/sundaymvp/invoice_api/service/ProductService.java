@@ -1,7 +1,10 @@
 package com.sundaymvp.invoice_api.service;
 
+import com.sundaymvp.invoice_api.dto.request.ProductRequest;
+import com.sundaymvp.invoice_api.dto.response.ProductResponse;
 import com.sundaymvp.invoice_api.entity.Product;
 import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
+import com.sundaymvp.invoice_api.mapper.ProductMapper;
 import com.sundaymvp.invoice_api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,39 +24,43 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Product getProductById(Long id) {
+    public ProductResponse getProductById(Long id) {
 
         Objects.requireNonNull(id, "Product id must not be null");
-
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-    }
-
-    public Product saveProduct(Product product) {
-
-        Objects.requireNonNull(product, "Product must not be null");
-
-        return productRepository.save(product);
-    }
-
-    public Product updateProduct(Long id, Product updatedProduct) {
-
-        Objects.requireNonNull(id, "Product id must not be null");
-        Objects.requireNonNull(updatedProduct, "Updated product must not be null");
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
-        product.setName(updatedProduct.getName());
-        product.setDescription(updatedProduct.getDescription());
-        product.setCategory(updatedProduct.getCategory());
-        product.setSku(updatedProduct.getSku());
-        product.setBarcode(updatedProduct.getBarcode());
-        product.setCostPrice(updatedProduct.getCostPrice());
-        product.setSellingPrice(updatedProduct.getSellingPrice());
-        product.setQuantity(updatedProduct.getQuantity());
-        product.setUnit(updatedProduct.getUnit());
-        product.setStatus(updatedProduct.getStatus());
+        return ProductMapper.toResponse(product);
+    }
+
+    public Product saveProduct(ProductRequest request) {
+
+        Objects.requireNonNull(request, "Product request must not be null");
+
+        Product product = ProductMapper.toEntity(request);
+
+        return productRepository.save(product);
+    }
+
+    public Product updateProduct(Long id, ProductRequest request) {
+
+        Objects.requireNonNull(id, "Product id must not be null");
+        Objects.requireNonNull(request, "Product request must not be null");
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setCategory(request.getCategory());
+        product.setSku(request.getSku());
+        product.setBarcode(request.getBarcode());
+        product.setCostPrice(request.getCostPrice());
+        product.setSellingPrice(request.getSellingPrice());
+        product.setQuantity(request.getQuantity());
+        product.setUnit(request.getUnit());
+        product.setStatus(request.getStatus());
 
         return productRepository.save(product);
     }
@@ -62,6 +69,9 @@ public class ProductService {
 
         Objects.requireNonNull(id, "Product id must not be null");
 
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        productRepository.delete(product);
     }
 }

@@ -1,0 +1,55 @@
+package com.sundaymvp.invoice_api.dto.response;
+
+public class CategoryResponse {
+
+    private Long id;
+    private String name;
+    private String description;
+    private Boolean status;
+
+    public CategoryResponse() {
+    }
+
+    public CategoryResponse(Long id, String name, String description, Boolean status) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getIdString() {
+        return String.valueOf(id);
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+}
