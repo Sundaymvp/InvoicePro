@@ -25,7 +25,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByReferenceNumber(String referenceNumber);
 
     /**
-     * Calculate total amount paid for an invoice.
+     * Calculate total amount paid for a specific invoice.
      */
     @Query("""
             SELECT COALESCE(SUM(p.amount), 0)
@@ -33,5 +33,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             WHERE p.invoice.id = :invoiceId
             """)
     Double calculateTotalPaid(Long invoiceId);
+
+    /**
+     * Calculate total payments received.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(p.amount), 0)
+            FROM Payment p
+            """)
+    Double calculateTotalPayments();
 
 }
