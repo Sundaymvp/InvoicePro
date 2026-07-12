@@ -1,49 +1,31 @@
-package com.sundaymvp.invoice_api.entity;
+package com.sundaymvp.invoice_api.dto.request;
 
 import com.sundaymvp.invoice_api.enums.PaymentMethod;
 import com.sundaymvp.invoice_api.enums.PaymentStatus;
-import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "payments")
-public class Payment {
+public class PaymentRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long invoiceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id", nullable =false)
-    private Invoice invoice;
-
-    @Column(nullable = false)
     private LocalDate paymentDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private PaymentMethod paymentMethod;
 
-    @Column(nullable = false)
     private Double amount;
 
-    @Column(unique = true)
     private String referenceNumber;
 
-    @Column(length = 1000)
     private String notes;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private PaymentStatus status;
 
-    public Payment() {
+    public PaymentRequest() {
     }
 
-    public Payment(
-            Long id,
-            Invoice invoice,
+    public PaymentRequest(
+            Long invoiceId,
             LocalDate paymentDate,
             PaymentMethod paymentMethod,
             Double amount,
@@ -51,8 +33,7 @@ public class Payment {
             String notes,
             PaymentStatus status) {
 
-        this.id = id;
-        this.invoice = invoice;
+        this.invoiceId = invoiceId;
         this.paymentDate = paymentDate;
         this.paymentMethod = paymentMethod;
         this.amount = amount;
@@ -61,20 +42,12 @@ public class Payment {
         this.status = status;
     }
 
-    public Long getId() {
-        return id;
+    public Long getInvoiceId() {
+        return invoiceId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Invoice getInvoice() {
-        return invoice;
-    }
-
-    public void setInvoice(Invoice invoice) {
-        this.invoice = invoice;
+    public void setInvoiceId(Long invoiceId) {
+        this.invoiceId = invoiceId;
     }
 
     public LocalDate getPaymentDate() {
