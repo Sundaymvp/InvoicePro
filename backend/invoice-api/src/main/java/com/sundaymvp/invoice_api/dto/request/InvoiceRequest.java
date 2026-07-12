@@ -1,5 +1,7 @@
 package com.sundaymvp.invoice_api.dto.request;
 
+import com.sundaymvp.invoice_api.enums.InvoiceStatus;
+
 import java.time.LocalDate;
 
 public class InvoiceRequest {
@@ -9,19 +11,20 @@ public class InvoiceRequest {
     private LocalDate invoiceDate;
     private LocalDate dueDate;
     private Double totalAmount;
-    private String status;
+    private InvoiceStatus status;
     private String notes;
 
     public InvoiceRequest() {
     }
 
-    public InvoiceRequest(String invoiceNumber,
-                          Long customerId,
-                          LocalDate invoiceDate,
-                          LocalDate dueDate,
-                          Double totalAmount,
-                          String status,
-                          String notes) {
+    public InvoiceRequest(
+            String invoiceNumber,
+            Long customerId,
+            LocalDate invoiceDate,
+            LocalDate dueDate,
+            Double totalAmount,
+            InvoiceStatus status,
+            String notes) {
 
         this.invoiceNumber = invoiceNumber;
         this.customerId = customerId;
@@ -72,11 +75,11 @@ public class InvoiceRequest {
         this.totalAmount = totalAmount;
     }
 
-    public String getStatus() {
+    public InvoiceStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(InvoiceStatus status) {
         this.status = status;
     }
 

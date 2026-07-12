@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.entity;
 
+import com.sundaymvp.invoice_api.enums.InvoiceStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -25,7 +26,9 @@ public class Invoice {
 
     private Double totalAmount;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private InvoiceStatus status;
 
     @Column(length = 1000)
     private String notes;
@@ -33,14 +36,15 @@ public class Invoice {
     public Invoice() {
     }
 
-    public Invoice(Long id,
-                   String invoiceNumber,
-                   Customer customer,
-                   LocalDate invoiceDate,
-                   LocalDate dueDate,
-                   Double totalAmount,
-                   String status,
-                   String notes) {
+    public Invoice(
+            Long id,
+            String invoiceNumber,
+            Customer customer,
+            LocalDate invoiceDate,
+            LocalDate dueDate,
+            Double totalAmount,
+            InvoiceStatus status,
+            String notes) {
 
         this.id = id;
         this.invoiceNumber = invoiceNumber;
@@ -100,11 +104,11 @@ public class Invoice {
         this.totalAmount = totalAmount;
     }
 
-    public String getStatus() {
+    public InvoiceStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(InvoiceStatus status) {
         this.status = status;
     }
 
