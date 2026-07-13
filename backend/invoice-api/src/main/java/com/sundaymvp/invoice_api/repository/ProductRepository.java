@@ -19,4 +19,33 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             """)
     Long countLowStockProducts(Integer threshold);
 
+    /**
+     * Count products that are out of stock.
+     */
+    @Query("""
+            SELECT COUNT(p)
+            FROM Product p
+            WHERE p.quantity = 0
+            """)
+    Long countOutOfStockProducts();
+
+    /**
+     * Calculate the total quantity of all products in stock.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(p.quantity), 0)
+            FROM Product p
+            """)
+    Long calculateTotalStockQuantity();
+
+    /**
+     * Calculate the total inventory value.
+     * (Quantity × Selling Price)
+     */
+    @Query("""
+            SELECT COALESCE(SUM(p.quantity * p.sellingPrice), 0)
+            FROM Product p
+            """)
+    Double calculateInventoryValue();
+
 }
