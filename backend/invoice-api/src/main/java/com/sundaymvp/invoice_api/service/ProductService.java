@@ -7,6 +7,10 @@ import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
 import com.sundaymvp.invoice_api.mapper.ProductMapper;
 import com.sundaymvp.invoice_api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,8 +25,21 @@ public class ProductService {
     }
 
     public List<Product> getAllProducts() {
+    
         return productRepository.findAll();
     }
+
+    /**
+ * Get products with pagination.
+ */
+public Page<Product> getProducts(
+        int page,
+        int size) {
+
+    Pageable pageable = PageRequest.of(page, size);
+
+    return productRepository.findAll(pageable);
+}
 
     public ProductResponse getProductById(Long id) {
 
@@ -33,6 +50,24 @@ public class ProductService {
 
         return ProductMapper.toResponse(product);
     }
+
+    /**
+ * Get paginated and sorted products.
+ */
+public Page<Product> getProducts(
+        int page,
+        int size,
+        String sortBy,
+        String direction) {
+
+    Sort sort = direction.equalsIgnoreCase("desc")
+            ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending();
+
+    Pageable pageable = PageRequest.of(page, size, sort);
+
+    return productRepository.findAll(pageable);
+}
 
     public Product saveProduct(ProductRequest request) {
 
@@ -74,4 +109,125 @@ public class ProductService {
 
         productRepository.delete(product);
     }
+
+    /**
+ * Search products with pagination and sorting.
+ */
+public Page<Product> searchProducts(
+        String keyword,
+        int page,
+        int size,
+        String sortBy,
+        String direction) {
+
+    Sort sort = direction.equalsIgnoreCase("desc")
+            ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending();
+
+    Pageable pageable = PageRequest.of(
+            page,
+            size,
+            sort);
+
+    return productRepository.findByNameContainingIgnoreCase(
+            keyword,
+            pageable);
+}
+
+/**
+ * Filter products.
+ */
+public Page<Product> filterProducts(
+
+        String category,
+        Boolean status,
+        Double minPrice,
+        Double maxPrice,
+        int page,
+        int size,
+        String sortBy,
+        String direction) {
+
+    Sort sort = direction.equalsIgnoreCase("desc")
+            ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending();
+
+    Pageable pageable = PageRequest.of(page, size, sort);
+
+    boolean hasCategory =
+            category != null && !category.isBlank();
+
+    boolean hasStatus =
+            status != null;
+
+    boolean hasPrice =
+            minPrice != null && maxPrice != null;
+
+    if (hasCategory && hasStatus && hasPrice) {
+
+        return productRepository
+                .findByCategoryContainingIgnoreCaseAndStatusAndSellingPriceBetween(
+                        category,
+                        status,
+                        minPrice,
+                        maxPrice,
+                        pageable);
+    }
+
+    if (hasCategory && hasStatus) {
+
+        return productRepository
+                .findByCategoryContainingIgnoreCaseAndStatus(
+                        category,
+                        status,
+                        pageable);
+    }
+
+    if (hasCategory && hasPrice) {
+
+        return productRepository
+                .findByCategoryContainingIgnoreCaseAndSellingPriceBetween(
+                        category,
+                        minPrice,
+                        maxPrice,
+                        pageable);
+    }
+
+    if (hasStatus && hasPrice) {
+
+        return productRepository
+                .findByStatusAndSellingPriceBetween(
+                        status,
+                        minPrice,
+                        maxPrice,
+                        pageable);
+    }
+
+    if (hasCategory) {
+
+        return productRepository
+                .findByCategoryContainingIgnoreCase(
+                        category,
+                        pageable);
+    }
+
+    if (hasStatus) {
+
+        return productRepository
+                .findByStatus(
+                        status,
+                        pageable);
+    }
+
+    if (hasPrice) {
+
+        return productRepository
+                .findBySellingPriceBetween(
+                        minPrice,
+                        maxPrice,
+                        pageable);
+    }
+
+    return productRepository.findAll(pageable);
+}
 }

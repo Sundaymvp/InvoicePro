@@ -175,7 +175,21 @@ public void deletePayment(Long id) {
 
     paymentRepository.delete(payment);
 
-    updateInvoiceStatus(invoice); 
+    updateInvoiceStatus(invoice); Double totalPaid = paymentRepository.calculateTotalPaid(invoice.getId());
+
+    if (totalPaid == null) {
+        totalPaid = 0.0;
+    }
+
+    if (totalPaid <= 0) {
+        invoice.setStatus(InvoiceStatus.UNPAID);
+    } else if (totalPaid < invoice.getTotalAmount()) {
+        invoice.setStatus(InvoiceStatus.PARTIALLY_PAID);
+    } else {
+        invoice.setStatus(InvoiceStatus.PAID);
+    }
+
+    invoiceRepository.save(invoice);
 }
 
 /**
