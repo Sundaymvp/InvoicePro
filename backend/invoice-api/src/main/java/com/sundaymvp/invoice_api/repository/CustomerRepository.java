@@ -1,7 +1,6 @@
 package com.sundaymvp.invoice_api.repository;
 
 import com.sundaymvp.invoice_api.entity.Customer;
-import com.sundaymvp.invoice_api.enums.InvoiceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -1,40 +1,66 @@
 package com.sundaymvp.invoice_api.service;
 
+import com.lowagie.text.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+
 import com.sundaymvp.invoice_api.entity.Invoice;
 import com.sundaymvp.invoice_api.entity.InvoiceItem;
 import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
-import com.sundaymvp.invoice_api.repository.InvoiceRepository;
 import com.sundaymvp.invoice_api.repository.InvoiceItemRepository;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfWriter;
+import com.sundaymvp.invoice_api.repository.InvoiceRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.text.NumberFormat;
+import java.awt.Color;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Service
 public class PdfService {
 
+    private static final Font TITLE_FONT =
+            FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20);
+
+    private static final Font HEADER_FONT =
+            FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+
+    private static final Font NORMAL_FONT =
+            FontFactory.getFont(FontFactory.HELVETICA, 10);
+
+    private static final Font TABLE_HEADER_FONT =
+            FontFactory.getFont(
+                    FontFactory.HELVETICA_BOLD,
+                    10,
+                    Color.WHITE);
+
+    private static final NumberFormat CURRENCY =
+            NumberFormat.getCurrencyInstance(Locale.of("en", "NG"));
+
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
 
     public PdfService(
-        InvoiceRepository invoiceRepository,
-        InvoiceItemRepository invoiceItemRepository) {
+            InvoiceRepository invoiceRepository,
+            InvoiceItemRepository invoiceItemRepository) {
 
-    this.invoiceRepository = invoiceRepository;
-    this.invoiceItemRepository = invoiceItemRepository;
-}
+        this.invoiceRepository = invoiceRepository;
+        this.invoiceItemRepository = invoiceItemRepository;
+    }
 
-    /**
-     * Generate Invoice PDF
-     */
     public byte[] generateInvoicePdf(Long invoiceId) {
 
-        Objects.requireNonNull(invoiceId, "Invoice id must not be null");   
+        Objects.requireNonNull(invoiceId, "Invoice id must not be null");
 
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() ->
@@ -42,82 +68,186 @@ public class PdfService {
 
         try {
 
-            ByteArrayOutputStream outputStream =
-                    new ByteArrayOutputStream();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-            Document document = new Document();
+            Document document = new Document(PageSize.A4);
 
             PdfWriter.getInstance(document, outputStream);
 
             document.open();
 
-            document.add(new Paragraph("MVP INVOICE SYSTEM"));
+            //-----------------------------------------
+            // COMPANY HEADER
+            //-----------------------------------------
+
+            Paragraph title =
+                    new Paragraph("MVP INVOICE SYSTEM", TITLE_FONT);
+
+            title.setAlignment(Element.ALIGN_CENTER);
+
+            document.add(title);
+
+            Paragraph company =
+                    new Paragraph(
+                            """
+                            Sunday MVP Technologies
+                            Lagos, Nigeria
+
+                            Email: support@mvpinvoice.com
+                            Phone: +234 800 000 0000
+                            Website: www.mvpinvoice.com
+                            """,
+                            NORMAL_FONT);
+
+            company.setAlignment(Element.ALIGN_CENTER);
+
+            document.add(company);
 
             document.add(new Paragraph(" "));
 
-            document.add(new Paragraph(
-                    "Invoice Number: " +
-                            invoice.getInvoiceNumber()));
+            //-----------------------------------------
+            // INVOICE DETAILS
+            //-----------------------------------------
+
+            PdfPTable infoTable = new PdfPTable(2);
+
+            infoTable.setWidthPercentage(100);
+
+            infoTable.setSpacingAfter(15);
+
+            infoTable.setWidths(new float[]{1,2});
+
+            infoTable.addCell(createLabelCell("Invoice Number"));
+            infoTable.addCell(createValueCell(invoice.getInvoiceNumber()));
+
+            infoTable.addCell(createLabelCell("Invoice Date"));
+            infoTable.addCell(createValueCell(invoice.getInvoiceDate().toString()));
+
+            infoTable.addCell(createLabelCell("Due Date"));
+            infoTable.addCell(createValueCell(invoice.getDueDate().toString()));
+
+            infoTable.addCell(createLabelCell("Status"));
+            infoTable.addCell(createValueCell(invoice.getStatus().name()));
+
+            document.add(infoTable);
+
+            //-----------------------------------------
+            // CUSTOMER
+            //-----------------------------------------
+
+            document.add(new Paragraph("Customer Details", HEADER_FONT));
 
             document.add(new Paragraph(
-                    "Invoice Date: " +
-                            invoice.getInvoiceDate()));
+                    "Name : " + invoice.getCustomer().getName(),
+                    NORMAL_FONT));
 
             document.add(new Paragraph(
-                    "Status: " +
-                            invoice.getStatus()));
+                    "Phone : " + invoice.getCustomer().getPhone(),
+                    NORMAL_FONT));
+
+            document.add(new Paragraph(
+                    "Email : " + invoice.getCustomer().getEmail(),
+                    NORMAL_FONT));
 
             document.add(new Paragraph(" "));
 
-            document.add(new Paragraph(
-                    "Customer: " +
-                            invoice.getCustomer().getName()));
+            //-----------------------------------------
+            // PRODUCTS TABLE
+            //-----------------------------------------
 
-            document.add(new Paragraph(
-                    "Phone: " +
-                            invoice.getCustomer().getPhone()));
+            PdfPTable table = new PdfPTable(4);
 
-            document.add(new Paragraph(
-                    "Email: " +
-                            invoice.getCustomer().getEmail()));
+            table.setWidthPercentage(100);
 
-            document.add(new Paragraph(" "));
+            table.setWidths(new float[]{4,1,2,2});
+
+            addHeader(table, "Product");
+            addHeader(table, "Qty");
+            addHeader(table, "Unit Price");
+            addHeader(table, "Total");
 
             List<InvoiceItem> items =
-        invoiceItemRepository.findByInvoiceId(invoiceId);
+                    invoiceItemRepository.findByInvoiceId(invoiceId);
 
             for (InvoiceItem item : items) {
 
-                document.add(new Paragraph(
+                table.addCell(item.getProduct().getName());
 
-                        item.getProduct().getName()
-                                + " | Qty: "
-                                + item.getQuantity()
-                                + " | Price: "
-                                + item.getUnitPrice()
-                                + " | Total: "
-                                + item.getLineTotal()
+                table.addCell(String.valueOf(item.getQuantity()));
 
-                ));
+                table.addCell(CURRENCY.format(item.getUnitPrice()));
+
+                table.addCell(CURRENCY.format(item.getLineTotal()));
             }
+
+            document.add(table);
 
             document.add(new Paragraph(" "));
 
-            document.add(new Paragraph(
-                    "Grand Total: ₦" +
-                            invoice.getTotalAmount()));
+            //-----------------------------------------
+            // TOTAL
+            //-----------------------------------------
+
+            Paragraph total =
+                    new Paragraph(
+                            "Grand Total : "
+                                    + CURRENCY.format(invoice.getTotalAmount()),
+                            HEADER_FONT);
+
+            total.setAlignment(Element.ALIGN_RIGHT);
+
+            document.add(total);
+
+            document.add(new Paragraph(" "));
+
+            Paragraph footer =
+                    new Paragraph(
+                            "Thank you for doing business with us.",
+                            NORMAL_FONT);
+
+            footer.setAlignment(Element.ALIGN_CENTER);
+
+            document.add(footer);
 
             document.close();
 
             return outputStream.toByteArray();
 
-        } catch (DocumentException ex) {
+        } catch (Exception ex) {
 
-            throw new RuntimeException(
-                    "Unable to generate PDF", ex);
-
+            throw new RuntimeException("Unable to generate PDF", ex);
         }
-
     }
 
+    //-------------------------------------------------
+
+    private PdfPCell createLabelCell(String text) {
+
+        PdfPCell cell = new PdfPCell(new Phrase(text, HEADER_FONT));
+
+        cell.setBorder(Rectangle.NO_BORDER);
+
+        return cell;
+    }
+
+    private PdfPCell createValueCell(String text) {
+
+        PdfPCell cell = new PdfPCell(new Phrase(text, NORMAL_FONT));
+
+        cell.setBorder(Rectangle.NO_BORDER);
+
+        return cell;
+    }
+
+    private void addHeader(PdfPTable table, String title) {
+
+        PdfPCell cell =
+                new PdfPCell(new Phrase(title, TABLE_HEADER_FONT));
+
+        cell.setBackgroundColor(Color.DARK_GRAY);
+
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        table.addCell(cell);
+    }
 }

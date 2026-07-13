@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("null")
 @Service
 public class ProductService {
 

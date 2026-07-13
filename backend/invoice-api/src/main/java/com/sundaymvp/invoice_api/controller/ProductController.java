@@ -7,7 +7,6 @@ import com.sundaymvp.invoice_api.service.ProductService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
