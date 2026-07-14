@@ -2,10 +2,12 @@ package com.sundaymvp.invoice_api.service;
 
 import com.sundaymvp.invoice_api.dto.request.InvoiceRequest;
 import com.sundaymvp.invoice_api.dto.response.InvoiceResponse;
+import com.sundaymvp.invoice_api.entity.Company;
 import com.sundaymvp.invoice_api.entity.Customer;
 import com.sundaymvp.invoice_api.entity.Invoice;
 import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
 import com.sundaymvp.invoice_api.mapper.InvoiceMapper;
+import com.sundaymvp.invoice_api.repository.CompanyRepository;
 import com.sundaymvp.invoice_api.repository.CustomerRepository;
 import com.sundaymvp.invoice_api.repository.InvoiceItemRepository;
 import com.sundaymvp.invoice_api.repository.InvoiceRepository;
@@ -21,17 +23,20 @@ public class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
+    private final CompanyRepository companyRepository;
     private final InvoiceItemRepository invoiceItemRepository;
     private final InvoiceEmailService invoiceEmailService;
 
     public InvoiceService(
             InvoiceRepository invoiceRepository,
             CustomerRepository customerRepository,
+            CompanyRepository companyRepository,
             InvoiceItemRepository invoiceItemRepository,
             InvoiceEmailService invoiceEmailService) {
 
         this.invoiceRepository = invoiceRepository;
         this.customerRepository = customerRepository;
+        this.companyRepository = companyRepository;
         this.invoiceItemRepository = invoiceItemRepository;
         this.invoiceEmailService = invoiceEmailService;
     }
@@ -67,8 +72,13 @@ public class InvoiceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Customer not found"));
 
+        Company company = companyRepository.findById(1L)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Company not found"));
+
         Invoice invoice = new Invoice();
 
+        invoice.setCompany(company);
         invoice.setInvoiceNumber(request.getInvoiceNumber());
         invoice.setCustomer(customer);
         invoice.setInvoiceDate(request.getInvoiceDate());
@@ -96,6 +106,11 @@ public class InvoiceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Customer not found"));
 
+        Company company = companyRepository.findById(1L)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Company not found"));
+
+        invoice.setCompany(company);
         invoice.setInvoiceNumber(request.getInvoiceNumber());
         invoice.setCustomer(customer);
         invoice.setInvoiceDate(request.getInvoiceDate());
@@ -130,7 +145,6 @@ public class InvoiceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Invoice not found"));
 
-        // Prevent possible null warnings.
         double total = Objects.requireNonNullElse(
                 invoiceItemRepository.calculateInvoiceTotal(invoiceId),
                 0.0
@@ -138,14 +152,13 @@ public class InvoiceService {
 
         invoice.setTotalAmount(total);
 
-Invoice updatedInvoice = invoiceRepository.save(invoice);
+        Invoice updatedInvoice = invoiceRepository.save(invoice);
 
-invoiceEmailService.sendInvoice(
-        updatedInvoice.getCustomer().getEmail(),
-        updatedInvoice.getCustomer().getName(),
-        updatedInvoice.getInvoiceNumber(),
-        updatedInvoice.getTotalAmount()
-);
-        
+        invoiceEmailService.sendInvoice(
+                updatedInvoice.getCustomer().getEmail(),
+                updatedInvoice.getCustomer().getName(),
+                updatedInvoice.getInvoiceNumber(),
+                updatedInvoice.getTotalAmount()
+        );
     }
 }

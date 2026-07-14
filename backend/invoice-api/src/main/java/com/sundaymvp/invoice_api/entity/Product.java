@@ -10,6 +10,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @Column(nullable = false)
     private String name;
 
@@ -36,12 +40,22 @@ public class Product {
     public Product() {
     }
 
-    public Product(Long id, String name, String description, String category,
-                   String sku, String barcode, Double costPrice,
-                   Double sellingPrice, Integer quantity,
-                   String unit, Boolean status) {
+    public Product(
+            Long id,
+            Company company,
+            String name,
+            String description,
+            String category,
+            String sku,
+            String barcode,
+            Double costPrice,
+            Double sellingPrice,
+            Integer quantity,
+            String unit,
+            Boolean status) {
 
         this.id = id;
+        this.company = company;
         this.name = name;
         this.description = description;
         this.category = category;
@@ -60,6 +74,14 @@ public class Product {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public String getName() {

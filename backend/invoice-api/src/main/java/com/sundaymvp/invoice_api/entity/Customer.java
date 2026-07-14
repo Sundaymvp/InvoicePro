@@ -10,6 +10,10 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @Column(nullable = false)
     private String name;
 
@@ -23,8 +27,16 @@ public class Customer {
     public Customer() {
     }
 
-    public Customer(Long id, String name, String email, String phone, String address) {
+    public Customer(
+            Long id,
+            Company company,
+            String name,
+            String email,
+            String phone,
+            String address) {
+
         this.id = id;
+        this.company = company;
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -37,6 +49,14 @@ public class Customer {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public String getName() {

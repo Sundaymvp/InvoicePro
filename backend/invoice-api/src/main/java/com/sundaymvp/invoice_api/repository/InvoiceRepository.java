@@ -1,6 +1,7 @@
 package com.sundaymvp.invoice_api.repository;
 
 import com.sundaymvp.invoice_api.dto.response.OutstandingInvoiceResponse;
+import com.sundaymvp.invoice_api.entity.Company;
 import com.sundaymvp.invoice_api.entity.Invoice;
 import com.sundaymvp.invoice_api.enums.InvoiceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,18 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
      * Check if invoice number already exists.
      */
     boolean existsByInvoiceNumber(String invoiceNumber);
+
+    /**
+     * Count invoices by company.
+     */
+    Long countByCompany(Company company);
+
+    /**
+     * Count invoices by company and status.
+     */
+    Long countByCompanyAndStatus(
+            Company company,
+            InvoiceStatus status);
 
     /**
      * Count invoices by status.
@@ -37,10 +50,20 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             LocalDate endDate);
 
     /**
+     * Calculate company revenue.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(i.totalAmount),0)
+            FROM Invoice i
+            WHERE i.company = :company
+            """)
+    Double calculateTotalRevenue(Company company);
+
+    /**
      * Calculate total revenue.
      */
     @Query("""
-            SELECT COALESCE(SUM(i.totalAmount), 0)
+            SELECT COALESCE(SUM(i.totalAmount),0)
             FROM Invoice i
             """)
     Double calculateTotalRevenue();
@@ -49,7 +72,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
      * Calculate revenue within a date range.
      */
     @Query("""
-            SELECT COALESCE(SUM(i.totalAmount), 0)
+            SELECT COALESCE(SUM(i.totalAmount),0)
             FROM Invoice i
             WHERE i.invoiceDate BETWEEN :startDate AND :endDate
             """)
@@ -57,53 +80,53 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             LocalDate startDate,
             LocalDate endDate);
 
-        /**
-     * Calculate revenue for a specific month and year.
+    /**
+     * Calculate monthly revenue.
      */
     @Query("""
-            SELECT COALESCE(SUM(i.totalAmount), 0)
+            SELECT COALESCE(SUM(i.totalAmount),0)
             FROM Invoice i
-            WHERE YEAR(i.invoiceDate) = :year
-              AND MONTH(i.invoiceDate) = :month
+            WHERE YEAR(i.invoiceDate)=:year
+            AND MONTH(i.invoiceDate)=:month
             """)
     Double calculateMonthlyRevenue(
             Integer year,
             Integer month);
 
-            /**
- * Outstanding invoices report.
- */
-@Query("""
-    SELECT new com.sundaymvp.invoice_api.dto.response.OutstandingInvoiceResponse(
-        i.id,
-        i.invoiceNumber,
-        i.customer.name,
-        i.invoiceDate,
-        i.dueDate,
-        i.totalAmount,
-        COALESCE(SUM(p.amount), 0),
-        i.totalAmount - COALESCE(SUM(p.amount), 0),
-        i.status
-    )
-    FROM Invoice i
-    LEFT JOIN Payment p
-        ON p.invoice.id = i.id
-       AND p.status = com.sundaymvp.invoice_api.enums.PaymentStatus.SUCCESS
-    WHERE i.status IN (
-        com.sundaymvp.invoice_api.enums.InvoiceStatus.UNPAID,
-        com.sundaymvp.invoice_api.enums.InvoiceStatus.PARTIALLY_PAID,
-        com.sundaymvp.invoice_api.enums.InvoiceStatus.OVERDUE
-    )
-    GROUP BY
-        i.id,
-        i.invoiceNumber,
-        i.customer.name,
-        i.invoiceDate,
-        i.dueDate,
-        i.totalAmount,
-        i.status
-    ORDER BY i.dueDate ASC
-    """)
-List<OutstandingInvoiceResponse> getOutstandingInvoices();
+    /**
+     * Outstanding invoices.
+     */
+    @Query("""
+        SELECT new com.sundaymvp.invoice_api.dto.response.OutstandingInvoiceResponse(
+            i.id,
+            i.invoiceNumber,
+            i.customer.name,
+            i.invoiceDate,
+            i.dueDate,
+            i.totalAmount,
+            COALESCE(SUM(p.amount),0),
+            i.totalAmount-COALESCE(SUM(p.amount),0),
+            i.status
+        )
+        FROM Invoice i
+        LEFT JOIN Payment p
+            ON p.invoice.id=i.id
+           AND p.status=com.sundaymvp.invoice_api.enums.PaymentStatus.SUCCESS
+        WHERE i.status IN(
+            com.sundaymvp.invoice_api.enums.InvoiceStatus.UNPAID,
+            com.sundaymvp.invoice_api.enums.InvoiceStatus.PARTIALLY_PAID,
+            com.sundaymvp.invoice_api.enums.InvoiceStatus.OVERDUE
+        )
+        GROUP BY
+            i.id,
+            i.invoiceNumber,
+            i.customer.name,
+            i.invoiceDate,
+            i.dueDate,
+            i.totalAmount,
+            i.status
+        ORDER BY i.dueDate ASC
+        """)
+    List<OutstandingInvoiceResponse> getOutstandingInvoices();
 
 }

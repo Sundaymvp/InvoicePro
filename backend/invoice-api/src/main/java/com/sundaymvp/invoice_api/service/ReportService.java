@@ -240,13 +240,13 @@ public class ReportService {
         Long totalCustomers = customerRepository.count();
 
         Long customersWithInvoices =
-                customerRepository.countCustomersWithInvoices();
+                customerRepository.countCustomersWithInvoices(null);
 
         Long customersWithoutInvoices =
-                customerRepository.countCustomersWithoutInvoices();
+                customerRepository.countCustomersWithoutInvoices(null);
 
         Long customersWithOutstandingInvoices =
-                customerRepository.countCustomersWithOutstandingInvoices();
+                customerRepository.countCustomersWithOutstandingInvoices(null);
 
         return new CustomerReportResponse(
                 totalCustomers,

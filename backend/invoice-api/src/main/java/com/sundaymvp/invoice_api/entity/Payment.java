@@ -14,6 +14,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id", nullable =false)
     private Invoice invoice;
@@ -43,6 +47,7 @@ public class Payment {
 
     public Payment(
             Long id,
+            Company company,
             Invoice invoice,
             LocalDate paymentDate,
             PaymentMethod paymentMethod,
@@ -52,6 +57,7 @@ public class Payment {
             PaymentStatus status) {
 
         this.id = id;
+        this.company = company;
         this.invoice = invoice;
         this.paymentDate = paymentDate;
         this.paymentMethod = paymentMethod;
@@ -69,10 +75,18 @@ public class Payment {
         this.id = id;
     }
 
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
+
     public Invoice getInvoice() {
         return invoice;
     }
-
+    
     public void setInvoice(Invoice invoice) {
         this.invoice = invoice;
     }

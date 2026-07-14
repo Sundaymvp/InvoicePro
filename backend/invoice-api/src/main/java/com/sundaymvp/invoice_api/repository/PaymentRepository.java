@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.repository;
 
+import com.sundaymvp.invoice_api.entity.Company;
 import com.sundaymvp.invoice_api.entity.Payment;
 import com.sundaymvp.invoice_api.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,36 +33,46 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Long countByStatus(PaymentStatus status);
 
     /**
-     * Calculate total amount paid for a specific invoice.
+     * Calculate amount paid for one invoice.
      */
     @Query("""
-            SELECT COALESCE(SUM(p.amount), 0)
+            SELECT COALESCE(SUM(p.amount),0)
             FROM Payment p
-            WHERE p.invoice.id = :invoiceId
+            WHERE p.invoice.id=:invoiceId
             """)
     Double calculateTotalPaid(Long invoiceId);
 
     /**
-     * Calculate total payments received.
+     * Calculate payments for one company.
      */
     @Query("""
-            SELECT COALESCE(SUM(p.amount), 0)
+            SELECT COALESCE(SUM(p.amount),0)
+            FROM Payment p
+            WHERE p.company=:company
+            """)
+    Double calculateTotalPayments(Company company);
+
+    /**
+     * Calculate total payments.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(p.amount),0)
             FROM Payment p
             """)
     Double calculateTotalPayments();
 
     /**
-     * Get payments within a date range.
+     * Payments within date range.
      */
     List<Payment> findByPaymentDateBetween(
             LocalDate startDate,
             LocalDate endDate);
 
     /**
-     * Calculate total payments within a date range.
+     * Payments within date range.
      */
     @Query("""
-            SELECT COALESCE(SUM(p.amount), 0)
+            SELECT COALESCE(SUM(p.amount),0)
             FROM Payment p
             WHERE p.paymentDate BETWEEN :startDate AND :endDate
             """)
@@ -70,23 +81,24 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             LocalDate endDate);
 
     /**
-     * Calculate total payments for a specific month and year.
+     * Monthly payments.
      */
     @Query("""
-            SELECT COALESCE(SUM(p.amount), 0)
+            SELECT COALESCE(SUM(p.amount),0)
             FROM Payment p
-            WHERE YEAR(p.paymentDate) = :year
-              AND MONTH(p.paymentDate) = :month
+            WHERE YEAR(p.paymentDate)=:year
+            AND MONTH(p.paymentDate)=:month
             """)
     Double calculateMonthlyPayments(
             Integer year,
             Integer month);
 
     /**
-     * Count payments by status within a date range.
+     * Count payments by status within date range.
      */
     Long countByStatusAndPaymentDateBetween(
             PaymentStatus status,
             LocalDate startDate,
             LocalDate endDate);
+
 }

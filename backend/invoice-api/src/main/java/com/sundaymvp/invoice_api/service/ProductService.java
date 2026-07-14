@@ -2,10 +2,13 @@ package com.sundaymvp.invoice_api.service;
 
 import com.sundaymvp.invoice_api.dto.request.ProductRequest;
 import com.sundaymvp.invoice_api.dto.response.ProductResponse;
+import com.sundaymvp.invoice_api.entity.Company;
 import com.sundaymvp.invoice_api.entity.Product;
 import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
 import com.sundaymvp.invoice_api.mapper.ProductMapper;
+import com.sundaymvp.invoice_api.repository.CompanyRepository;
 import com.sundaymvp.invoice_api.repository.ProductRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,9 +23,11 @@ import java.util.Objects;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CompanyRepository companyRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CompanyRepository companyRepository) {
         this.productRepository = productRepository;
+        this.companyRepository = companyRepository;
     }
 
     public List<Product> getAllProducts() {
@@ -73,8 +78,13 @@ public Page<Product> getProducts(
     public Product saveProduct(ProductRequest request) {
 
         Objects.requireNonNull(request, "Product request must not be null");
+                Company company = companyRepository.findById(1L)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Company not found"));
+
 
         Product product = ProductMapper.toEntity(request);
+        product.setCompany(company);
 
         return productRepository.save(product);
     }
@@ -97,6 +107,9 @@ public Page<Product> getProducts(
         product.setQuantity(request.getQuantity());
         product.setUnit(request.getUnit());
         product.setStatus(request.getStatus());
+
+        // Preserve company relationship
+product.setCompany(product.getCompany());
 
         return productRepository.save(product);
     }

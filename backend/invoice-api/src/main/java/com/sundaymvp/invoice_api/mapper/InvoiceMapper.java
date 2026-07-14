@@ -14,6 +14,9 @@ public class InvoiceMapper {
                 invoice.getId(),
                 invoice.getInvoiceNumber(),
 
+                invoice.getCompany().getId(),
+                invoice.getCompany().getCompanyName(),
+
                 invoice.getCustomer().getId(),
                 invoice.getCustomer().getName(),
 

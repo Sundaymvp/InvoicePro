@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.repository;
 
+import com.sundaymvp.invoice_api.entity.Company;
 import com.sundaymvp.invoice_api.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             """)
     Long countLowStockProducts(Integer threshold);
 
+    @Query("""
+    SELECT COUNT(p)
+    FROM Product p
+    WHERE p.company = :company
+    AND p.quantity <= :quantity
+    """)
+Long countLowStockProducts(
+        Company company,
+        Integer quantity);
+
     /**
      * Count products that are out of stock.
      */
@@ -30,6 +41,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             WHERE p.quantity = 0
             """)
     Long countOutOfStockProducts();
+
 
     /**
      * Calculate the total quantity of all products in stock.

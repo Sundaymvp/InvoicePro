@@ -5,17 +5,19 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
+import com.sundaymvp.invoice_api.entity.Company;
 import com.sundaymvp.invoice_api.entity.Invoice;
 import com.sundaymvp.invoice_api.entity.InvoiceItem;
 import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
+import com.sundaymvp.invoice_api.repository.CompanyRepository;
 import com.sundaymvp.invoice_api.repository.InvoiceItemRepository;
 import com.sundaymvp.invoice_api.repository.InvoiceRepository;
 
 import org.springframework.stereotype.Service;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.text.NumberFormat;
-import java.awt.Color;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -43,13 +45,16 @@ public class PdfService {
 
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
+    private final CompanyRepository companyRepository;
 
     public PdfService(
             InvoiceRepository invoiceRepository,
-            InvoiceItemRepository invoiceItemRepository) {
+            InvoiceItemRepository invoiceItemRepository,
+            CompanyRepository companyRepository) {
 
         this.invoiceRepository = invoiceRepository;
         this.invoiceItemRepository = invoiceItemRepository;
+        this.companyRepository = companyRepository;
     }
 
     public byte[] generateInvoicePdf(Long invoiceId) {
@@ -60,9 +65,11 @@ public class PdfService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Invoice not found"));
 
-        try {
+        Company company = companyRepository.findById(1L)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Company not found"));
 
-        
+        try {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -77,27 +84,26 @@ public class PdfService {
             //-----------------------------------------
 
             Paragraph title =
-                    new Paragraph("MVP INVOICE SYSTEM", TITLE_FONT);
+                    new Paragraph(company.getCompanyName(), TITLE_FONT);
 
             title.setAlignment(Element.ALIGN_CENTER);
 
             document.add(title);
 
-            Paragraph company =
+            Paragraph companyInfo =
                     new Paragraph(
-                            """
-                            Sunday MVP Technologies
-                            Lagos, Nigeria
-
-                            Email: support@mvpinvoice.com
-                            Phone: +234 800 000 0000
-                            Website: www.mvpinvoice.com
-                            """,
+                            company.getAddress() + "\n"
+                                    + company.getCity() + ", "
+                                    + company.getState() + ", "
+                                    + company.getCountry() + "\n\n"
+                                    + "Email: " + company.getEmail() + "\n"
+                                    + "Phone: " + company.getPhone() + "\n"
+                                    + "Website: " + company.getWebsite(),
                             NORMAL_FONT);
 
-            company.setAlignment(Element.ALIGN_CENTER);
+            companyInfo.setAlignment(Element.ALIGN_CENTER);
 
-            document.add(company);
+            document.add(companyInfo);
 
             document.add(new Paragraph(" "));
 
@@ -108,10 +114,8 @@ public class PdfService {
             PdfPTable infoTable = new PdfPTable(2);
 
             infoTable.setWidthPercentage(100);
-
             infoTable.setSpacingAfter(15);
-
-            infoTable.setWidths(new float[]{1,2});
+            infoTable.setWidths(new float[]{1, 2});
 
             infoTable.addCell(createLabelCell("Invoice Number"));
             infoTable.addCell(createValueCell(invoice.getInvoiceNumber()));
@@ -148,14 +152,13 @@ public class PdfService {
             document.add(new Paragraph(" "));
 
             //-----------------------------------------
-            // PRODUCTS TABLE
+            // PRODUCTS
             //-----------------------------------------
 
             PdfPTable table = new PdfPTable(4);
 
             table.setWidthPercentage(100);
-
-            table.setWidths(new float[]{4,1,2,2});
+            table.setWidths(new float[]{4, 1, 2, 2});
 
             addHeader(table, "Product");
             addHeader(table, "Qty");
@@ -196,9 +199,15 @@ public class PdfService {
 
             document.add(new Paragraph(" "));
 
+            //-----------------------------------------
+            // FOOTER
+            //-----------------------------------------
+
             Paragraph footer =
                     new Paragraph(
-                            "Thank you for doing business with us.",
+                            company.getInvoiceFooter() != null
+                                    ? company.getInvoiceFooter()
+                                    : "Thank you for doing business with us.",
                             NORMAL_FONT);
 
             footer.setAlignment(Element.ALIGN_CENTER);
@@ -214,9 +223,10 @@ public class PdfService {
             throw new RuntimeException("Unable to generate PDF", ex);
         }
     }
-        public byte[] getInvoicePdf(Long invoiceId) {
-    return generateInvoicePdf(invoiceId);
-}
+
+    public byte[] getInvoicePdf(Long invoiceId) {
+        return generateInvoicePdf(invoiceId);
+    }
 
     //-------------------------------------------------
 

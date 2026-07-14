@@ -7,12 +7,17 @@ import java.time.LocalDate;
 public class InvoiceResponse {
 
     private Long id;
+
     private String invoiceNumber;
+
+    private Long companyId;
+    private String companyName;
 
     private Long customerId;
     private String customerName;
 
     private LocalDate invoiceDate;
+
     private LocalDate dueDate;
 
     private Double totalAmount;
@@ -27,6 +32,8 @@ public class InvoiceResponse {
     public InvoiceResponse(
             Long id,
             String invoiceNumber,
+            Long companyId,
+            String companyName,
             Long customerId,
             String customerName,
             LocalDate invoiceDate,
@@ -37,6 +44,8 @@ public class InvoiceResponse {
 
         this.id = id;
         this.invoiceNumber = invoiceNumber;
+        this.companyId = companyId;
+        this.companyName = companyName;
         this.customerId = customerId;
         this.customerName = customerName;
         this.invoiceDate = invoiceDate;
@@ -60,6 +69,22 @@ public class InvoiceResponse {
 
     public void setInvoiceNumber(String invoiceNumber) {
         this.invoiceNumber = invoiceNumber;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public Long getCustomerId() {

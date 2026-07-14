@@ -13,6 +13,10 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @Column(nullable = false, unique = true)
     private String invoiceNumber;
 
@@ -38,6 +42,7 @@ public class Invoice {
 
     public Invoice(
             Long id,
+            Company company,
             String invoiceNumber,
             Customer customer,
             LocalDate invoiceDate,
@@ -47,6 +52,7 @@ public class Invoice {
             String notes) {
 
         this.id = id;
+        this.company = company;
         this.invoiceNumber = invoiceNumber;
         this.customer = customer;
         this.invoiceDate = invoiceDate;
@@ -62,6 +68,14 @@ public class Invoice {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public String getInvoiceNumber() {
