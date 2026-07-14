@@ -22,15 +22,18 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
     private final InvoiceItemRepository invoiceItemRepository;
+    private final InvoiceEmailService invoiceEmailService;
 
     public InvoiceService(
             InvoiceRepository invoiceRepository,
             CustomerRepository customerRepository,
-            InvoiceItemRepository invoiceItemRepository) {
+            InvoiceItemRepository invoiceItemRepository,
+            InvoiceEmailService invoiceEmailService) {
 
         this.invoiceRepository = invoiceRepository;
         this.customerRepository = customerRepository;
         this.invoiceItemRepository = invoiceItemRepository;
+        this.invoiceEmailService = invoiceEmailService;
     }
 
     public List<InvoiceResponse> getAllInvoices() {
@@ -135,6 +138,14 @@ public class InvoiceService {
 
         invoice.setTotalAmount(total);
 
-        invoiceRepository.save(invoice);
+Invoice updatedInvoice = invoiceRepository.save(invoice);
+
+invoiceEmailService.sendInvoice(
+        updatedInvoice.getCustomer().getEmail(),
+        updatedInvoice.getCustomer().getName(),
+        updatedInvoice.getInvoiceNumber(),
+        updatedInvoice.getTotalAmount()
+);
+        
     }
 }

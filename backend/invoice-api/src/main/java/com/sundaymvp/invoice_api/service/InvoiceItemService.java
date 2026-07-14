@@ -77,15 +77,20 @@ public class InvoiceItemService {
         invoiceItem.setProduct(product);
         invoiceItem.setQuantity(request.getQuantity());
         invoiceItem.setUnitPrice(request.getUnitPrice());
-        invoiceItem.setDiscount(request.getDiscount());
-        invoiceItem.setTax(request.getTax());
+        
+        // Use 0.0 if discount or tax is not provided
+Double discount = Objects.requireNonNullElse(request.getDiscount(), 0.0);
+Double tax = Objects.requireNonNullElse(request.getTax(), 0.0);
 
-        double lineTotal =
-                (request.getQuantity() * request.getUnitPrice())
-                        - request.getDiscount()
-                        + request.getTax();
+invoiceItem.setDiscount(discount);
+invoiceItem.setTax(tax);
 
-        invoiceItem.setLineTotal(lineTotal);
+double lineTotal =
+        (request.getQuantity() * request.getUnitPrice())
+                - discount
+                + tax;
+
+invoiceItem.setLineTotal(lineTotal);
 
         // Reduce stock
         product.setQuantity(product.getQuantity() - request.getQuantity());

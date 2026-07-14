@@ -1,12 +1,6 @@
 package com.sundaymvp.invoice_api.service;
 
 import com.lowagie.text.*;
-import com.lowagie.text.Document;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -67,6 +61,8 @@ public class PdfService {
                         new ResourceNotFoundException("Invoice not found"));
 
         try {
+
+        
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -218,6 +214,9 @@ public class PdfService {
             throw new RuntimeException("Unable to generate PDF", ex);
         }
     }
+        public byte[] getInvoicePdf(Long invoiceId) {
+    return generateInvoicePdf(invoiceId);
+}
 
     //-------------------------------------------------
 
