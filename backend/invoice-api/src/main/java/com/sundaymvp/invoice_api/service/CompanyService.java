@@ -3,9 +3,11 @@ package com.sundaymvp.invoice_api.service;
 import com.sundaymvp.invoice_api.dto.request.CompanyRequest;
 import com.sundaymvp.invoice_api.dto.response.CompanyResponse;
 import com.sundaymvp.invoice_api.entity.Company;
+import com.sundaymvp.invoice_api.exception.DeleteNotAllowedException;
 import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
 import com.sundaymvp.invoice_api.mapper.CompanyMapper;
 import com.sundaymvp.invoice_api.repository.CompanyRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -152,12 +154,15 @@ public class CompanyService {
      */
     public void deleteCompany(Long id) {
 
-        Objects.requireNonNull(id, "Company id must not be null");
+    Company company = companyRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Company not found"));
 
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Company not found"));
-
+    try {
         companyRepository.delete(company);
+    } catch (DataIntegrityViolationException ex) {
+        throw new DeleteNotAllowedException(
+                "Cannot delete company because it has related records.");
+    }
     }
 }

@@ -27,8 +27,13 @@ public class CustomerService {
         this.companyRepository = companyRepository;
     }
 
-    public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+    public List<CustomerResponse> getAllCustomers() {
+
+    return customerRepository.findAll()
+            .stream()
+            .map(CustomerMapper::toResponse)
+            .toList();
+
     }
 
     public CustomerResponse getCustomerById(Long id) {

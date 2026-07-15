@@ -2,6 +2,7 @@ package com.sundaymvp.invoice_api.controller;
 
 import com.sundaymvp.invoice_api.dto.response.CustomerResponse;
 import com.sundaymvp.invoice_api.entity.Customer;
+import com.sundaymvp.invoice_api.mapper.CustomerMapper;
 import com.sundaymvp.invoice_api.service.CustomerService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +19,10 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
-        return customerService.getAllCustomers();
-    }
+public List<CustomerResponse> getAllCustomers() {
+    return customerService.getAllCustomers();
+
+}
 
     @GetMapping("/{id}")
     public CustomerResponse getCustomer(@PathVariable Long id) {
@@ -28,16 +30,23 @@ public class CustomerController {
     }
 
     @PostMapping
-    public Customer createCustomer(@RequestBody Customer customer) {
-        return customerService.saveCustomer(customer);
+public CustomerResponse createCustomer(@RequestBody Customer customer) {
+
+    Customer saved = customerService.saveCustomer(customer);
+
+    return CustomerMapper.toResponse(saved);
+
     }
 
     @PutMapping("/{id}")
-    public Customer updateCustomer(
-            @PathVariable Long id,
-            @RequestBody Customer customer) {
+public CustomerResponse updateCustomer(
+        @PathVariable Long id,
+        @RequestBody Customer customer) {
 
-        return customerService.updateCustomer(id, customer);
+    Customer updated = customerService.updateCustomer(id, customer);
+
+    return CustomerMapper.toResponse(updated);
+
     }
 
     @DeleteMapping("/{id}")
