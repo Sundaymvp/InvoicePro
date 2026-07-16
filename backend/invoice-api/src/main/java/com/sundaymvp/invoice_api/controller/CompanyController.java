@@ -6,6 +6,7 @@ import com.sundaymvp.invoice_api.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class CompanyController {
     /**
      * Get all companies
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<CompanyResponse>> getAllCompanies() {
 
@@ -34,6 +36,7 @@ public class CompanyController {
     /**
      * Get company by id
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CompanyResponse> getCompanyById(
             @PathVariable Long id) {
@@ -45,6 +48,7 @@ public class CompanyController {
     /**
      * Get current company
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/current")
     public ResponseEntity<CompanyResponse> getCurrentCompany() {
 
@@ -55,6 +59,7 @@ public class CompanyController {
     /**
      * Create company
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CompanyResponse> createCompany(
             @Valid @RequestBody CompanyRequest request) {
@@ -67,6 +72,7 @@ public class CompanyController {
     /**
      * Update company
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CompanyResponse> updateCompany(
             @PathVariable Long id,
@@ -79,6 +85,7 @@ public class CompanyController {
     /**
      * Delete company
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCompany(
             @PathVariable Long id) {

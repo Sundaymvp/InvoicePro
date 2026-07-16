@@ -2,14 +2,15 @@ package com.sundaymvp.invoice_api.controller;
 
 import com.sundaymvp.invoice_api.dto.request.ProductRequest;
 import com.sundaymvp.invoice_api.dto.response.ProductResponse;
-import com.sundaymvp.invoice_api.entity.Product;
 import com.sundaymvp.invoice_api.service.ProductService;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/products")
+@CrossOrigin(origins = "*")
 public class ProductController {
 
     private final ProductService productService;
@@ -18,136 +19,155 @@ public class ProductController {
         this.productService = productService;
     }
 
-/**
- * Get products with pagination and sorting.
- *
- * Examples:
- * GET /api/products
- * GET /api/products?page=1&size=20
- * GET /api/products?page=0&size=10&sort=name,asc
- */
-@GetMapping
-public Page<Product> getProducts(
+    /**
+     * Get products with pagination and sorting.
+     *
+     * Examples:
+     * GET /api/products
+     * GET /api/products?page=1&size=20
+     * GET /api/products?page=0&size=10&sort=name,asc
+     */
+    @GetMapping
+    public ResponseEntity<Page<ProductResponse>> getProducts(
 
-        @RequestParam(defaultValue = "0")
-        int page,
+            @RequestParam(defaultValue = "0")
+            int page,
 
-        @RequestParam(defaultValue = "10")
-        int size,
+            @RequestParam(defaultValue = "10")
+            int size,
 
-        @RequestParam(defaultValue = "id")
-        String sortBy,
+            @RequestParam(defaultValue = "id")
+            String sortBy,
 
-        @RequestParam(defaultValue = "asc")
-        String direction) {
+            @RequestParam(defaultValue = "asc")
+            String direction) {
 
-    return productService.getProducts(
-            page,
-            size,
-            sortBy,
-            direction);
-}
+        return ResponseEntity.ok(
+                productService.getProducts(
+                        page,
+                        size,
+                        sortBy,
+                        direction));
+    }
 
-/**
- * Search products by name.
- *
- * Examples:
- * GET /api/products/search?keyword=laptop
- * GET /api/products/search?keyword=mouse&page=0&size=5
- */
-@GetMapping("/search")
-public Page<Product> searchProducts(
+    /**
+     * Search products by name.
+     */
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductResponse>> searchProducts(
 
-        @RequestParam String keyword,
+            @RequestParam String keyword,
 
-        @RequestParam(defaultValue = "0")
-        int page,
+            @RequestParam(defaultValue = "0")
+            int page,
 
-        @RequestParam(defaultValue = "10")
-        int size,
+            @RequestParam(defaultValue = "10")
+            int size,
 
-        @RequestParam(defaultValue = "id")
-        String sortBy,
+            @RequestParam(defaultValue = "id")
+            String sortBy,
 
-        @RequestParam(defaultValue = "asc")
-        String direction) {
+            @RequestParam(defaultValue = "asc")
+            String direction) {
 
-    return productService.searchProducts(
-            keyword,
-            page,
-            size,
-            sortBy,
-            direction);
-}    
+        return ResponseEntity.ok(
+                productService.searchProducts(
+                        keyword,
+                        page,
+                        size,
+                        sortBy,
+                        direction));
+    }
 
-/**
- * Filter products.
- *
- * Examples:
- * GET /api/products/filter
- * GET /api/products/filter?category=Electronics
- * GET /api/products/filter?status=true
- * GET /api/products/filter?minPrice=1000&maxPrice=5000
- * GET /api/products/filter?category=Electronics&status=true
- * GET /api/products/filter?category=Electronics&status=true&minPrice=1000&maxPrice=5000
- */
-@GetMapping("/filter")
-public Page<Product> filterProducts(
+    /**
+     * Filter products.
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<Page<ProductResponse>> filterProducts(
 
-        @RequestParam(required = false)
-        String category,
+            @RequestParam(required = false)
+            String category,
 
-        @RequestParam(required = false)
-        Boolean status,
+            @RequestParam(required = false)
+            Boolean status,
 
-        @RequestParam(required = false)
-        Double minPrice,
+            @RequestParam(required = false)
+            Double minPrice,
 
-        @RequestParam(required = false)
-        Double maxPrice,
+            @RequestParam(required = false)
+            Double maxPrice,
 
-        @RequestParam(defaultValue = "0")
-        int page,
+            @RequestParam(defaultValue = "0")
+            int page,
 
-        @RequestParam(defaultValue = "10")
-        int size,
+            @RequestParam(defaultValue = "10")
+            int size,
 
-        @RequestParam(defaultValue = "id")
-        String sortBy,
+            @RequestParam(defaultValue = "id")
+            String sortBy,
 
-        @RequestParam(defaultValue = "asc")
-        String direction) {
+            @RequestParam(defaultValue = "asc")
+            String direction) {
 
-    return productService.filterProducts(
-            category,
-            status,
-            minPrice,
-            maxPrice,
-            page,
-            size,
-            sortBy,
-            direction);
-}
+        return ResponseEntity.ok(
+                productService.filterProducts(
+                        category,
+                        status,
+                        minPrice,
+                        maxPrice,
+                        page,
+                        size,
+                        sortBy,
+                        direction));
+    }
+
+    /**
+     * Get product by id.
+     */
     @GetMapping("/{id}")
-    public ProductResponse getProduct(@PathVariable Long id) {
-        return productService.getProductById(id);
+    public ResponseEntity<ProductResponse> getProduct(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                productService.getProductById(id));
     }
 
+    /**
+     * Create product.
+     */
     @PostMapping
-    public Product createProduct(@RequestBody ProductRequest request) {
-        return productService.saveProduct(request);
-    }
-
-    @PutMapping("/{id}")
-    public Product updateProduct(
-            @PathVariable Long id,
+    public ResponseEntity<ProductResponse> createProduct(
             @RequestBody ProductRequest request) {
 
-        return productService.updateProduct(id, request);
+        return new ResponseEntity<>(
+                productService.saveProduct(request),
+                HttpStatus.CREATED);
     }
 
+    /**
+     * Update product.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponse> updateProduct(
+
+            @PathVariable Long id,
+
+            @RequestBody ProductRequest request) {
+
+        return ResponseEntity.ok(
+                productService.updateProduct(id, request));
+    }
+
+    /**
+     * Delete product.
+     */
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable Long id) {
+
         productService.deleteProduct(id);
+
+        return ResponseEntity.ok(
+                "Product deleted successfully.");
     }
 }
