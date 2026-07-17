@@ -25,7 +25,7 @@ public class CompanyController {
     /**
      * Get all companies
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     @GetMapping
     public ResponseEntity<List<CompanyResponse>> getAllCompanies() {
 
@@ -36,7 +36,7 @@ public class CompanyController {
     /**
      * Get company by id
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<CompanyResponse> getCompanyById(
             @PathVariable Long id) {
@@ -48,7 +48,7 @@ public class CompanyController {
     /**
      * Get current company
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     @GetMapping("/current")
     public ResponseEntity<CompanyResponse> getCurrentCompany() {
 
