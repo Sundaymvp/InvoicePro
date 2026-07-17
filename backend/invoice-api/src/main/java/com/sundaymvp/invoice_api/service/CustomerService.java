@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.service;
 
+import com.sundaymvp.invoice_api.audit.Audit;
 import com.sundaymvp.invoice_api.dto.response.CustomerResponse;
 import com.sundaymvp.invoice_api.entity.Company;
 import com.sundaymvp.invoice_api.entity.Customer;
@@ -46,7 +47,11 @@ public class CustomerService {
 
         return CustomerMapper.toResponse(customer);
     }
-
+        
+        @Audit(
+        module = "Customer",
+        action = "CREATE"
+)
     public Customer saveCustomer(Customer customer) {
 
         Objects.requireNonNull(customer, "Customer must not be null");
@@ -60,6 +65,10 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
+        @Audit(
+        module = "Customer",
+        action = "UPDATE"
+)
     public Customer updateCustomer(Long id, Customer updatedCustomer) {
 
         Objects.requireNonNull(id, "Customer id must not be null");
@@ -82,6 +91,10 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
+    @Audit(
+        module = "Customer",
+        action = "DELETE"
+)
     public void deleteCustomer(Long id) {
 
         Objects.requireNonNull(id, "Customer id must not be null");

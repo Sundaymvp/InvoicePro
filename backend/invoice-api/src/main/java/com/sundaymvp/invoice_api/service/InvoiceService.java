@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.service;
 
+import com.sundaymvp.invoice_api.audit.Audit;
 import com.sundaymvp.invoice_api.dto.request.InvoiceRequest;
 import com.sundaymvp.invoice_api.dto.response.InvoiceResponse;
 import com.sundaymvp.invoice_api.entity.Company;
@@ -60,6 +61,10 @@ public class InvoiceService {
         return InvoiceMapper.toResponse(invoice);
     }
 
+    @Audit(
+        module = "Invoice",
+        action = "CREATE"
+)
     public InvoiceResponse saveInvoice(InvoiceRequest request) {
 
         Objects.requireNonNull(request, "Invoice request must not be null");
@@ -93,6 +98,10 @@ public class InvoiceService {
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
     }
 
+    @Audit(
+        module = "Invoice",
+        action = "UPDATE"
+)
     public InvoiceResponse updateInvoice(Long id, InvoiceRequest request) {
 
         Objects.requireNonNull(id, "Invoice id must not be null");
@@ -123,6 +132,10 @@ public class InvoiceService {
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
     }
 
+    @Audit(
+        module = "Invoice",
+        action = "DELETE"
+)
     public void deleteInvoice(Long id) {
 
         Objects.requireNonNull(id, "Invoice id must not be null");

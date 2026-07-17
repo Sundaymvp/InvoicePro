@@ -8,6 +8,7 @@ import com.sundaymvp.invoice_api.exception.ResourceNotFoundException;
 import com.sundaymvp.invoice_api.mapper.ProductMapper;
 import com.sundaymvp.invoice_api.repository.CompanyRepository;
 import com.sundaymvp.invoice_api.repository.ProductRepository;
+import com.sundaymvp.invoice_api.audit.Audit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -90,6 +91,10 @@ public class ProductService {
     /**
      * Save product.
      */
+    @Audit(
+        module = "Product",
+        action = "CREATE"
+)
     public ProductResponse saveProduct(ProductRequest request) {
 
         Objects.requireNonNull(request, "Product request must not be null");
@@ -109,6 +114,10 @@ public class ProductService {
     /**
      * Update product.
      */
+    @Audit(
+        module = "Product",
+        action = "UPDATE"
+)
     public ProductResponse updateProduct(Long id,
                                          ProductRequest request) {
 
@@ -138,6 +147,10 @@ public class ProductService {
     /**
      * Delete product.
      */
+    @Audit(
+        module = "Product",
+        action = "DELETE"
+)
     public void deleteProduct(Long id) {
 
         Objects.requireNonNull(id, "Product id must not be null");

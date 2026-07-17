@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.service;
 
+import com.sundaymvp.invoice_api.audit.Audit;
 import com.sundaymvp.invoice_api.dto.request.CompanyRequest;
 import com.sundaymvp.invoice_api.dto.response.CompanyResponse;
 import com.sundaymvp.invoice_api.entity.Company;
@@ -67,6 +68,10 @@ public class CompanyService {
     /**
      * Create company
      */
+    @Audit(
+        module = "Company",
+        action = "CREATE"
+)
     public CompanyResponse saveCompany(CompanyRequest request) {
 
         Objects.requireNonNull(request, "Company request must not be null");
@@ -106,6 +111,10 @@ public class CompanyService {
     /**
      * Update company
      */
+    @Audit(
+        module = "Company",
+        action = "UPDATE"
+)
     public CompanyResponse updateCompany(
             Long id,
             CompanyRequest request) {
@@ -152,6 +161,10 @@ public class CompanyService {
     /**
      * Delete company
      */
+    @Audit(
+        module = "Company",
+        action = "DELETE"
+)
     public void deleteCompany(Long id) {
 
     Company company = companyRepository.findById(id)
