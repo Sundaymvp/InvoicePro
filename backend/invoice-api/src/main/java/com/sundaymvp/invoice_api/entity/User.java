@@ -26,6 +26,9 @@ public class User {
 
     private String phone;
 
+    @Column(length = 255)
+    private String profileImage;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
@@ -102,6 +105,14 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getProfileImage() {
+    return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+    this.profileImage = profileImage;
     }
 
     public Role getRole() {

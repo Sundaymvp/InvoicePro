@@ -10,6 +10,7 @@ import com.sundaymvp.invoice_api.mapper.CompanyMapper;
 import com.sundaymvp.invoice_api.repository.CompanyRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,11 +21,14 @@ import java.util.stream.Collectors;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final FileStorageService fileStorageService;
 
     public CompanyService(
-            CompanyRepository companyRepository) {
+            CompanyRepository companyRepository,
+            FileStorageService fileStorageService) {
 
         this.companyRepository = companyRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -156,6 +160,51 @@ public class CompanyService {
 
         return CompanyMapper.toResponse(
                 companyRepository.save(company));
+    }
+
+        /**
+     * Upload company logo
+     */
+    @Audit(
+            module = "Company",
+            action = "UPLOAD LOGO"
+    )
+    public CompanyResponse uploadLogo(
+            Long companyId,
+            MultipartFile file) {
+
+        Objects.requireNonNull(
+                companyId,
+                "Company id must not be null");
+
+        Objects.requireNonNull(
+                file,
+                "File must not be null");
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Company not found"));
+
+        // Delete old logo if it exists
+        if (company.getLogo() != null
+                && !company.getLogo().isBlank()) {
+
+            fileStorageService.deleteFile(
+                    "company-logos",
+                    company.getLogo());
+        }
+
+        // Upload new logo
+        String filename = fileStorageService.uploadFile(
+                file,
+                "company-logos");
+
+        company.setLogo(filename);
+
+        Company savedCompany = companyRepository.save(company);
+
+        return CompanyMapper.toResponse(savedCompany);
     }
 
     /**

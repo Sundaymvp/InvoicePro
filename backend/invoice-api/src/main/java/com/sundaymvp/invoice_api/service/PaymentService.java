@@ -1,5 +1,6 @@
 package com.sundaymvp.invoice_api.service;
 
+import com.sundaymvp.invoice_api.audit.Audit;
 import com.sundaymvp.invoice_api.dto.request.PaymentRequest;
 import com.sundaymvp.invoice_api.dto.response.PaymentResponse;
 import com.sundaymvp.invoice_api.entity.Invoice;
@@ -58,6 +59,10 @@ public class PaymentService {
     /**
      * Save payment
      */
+    @Audit(
+        module = "Payment",
+        action = "CREATE"
+)
     public PaymentResponse savePayment(PaymentRequest request) {
 
         Objects.requireNonNull(request, "Payment request must not be null");
@@ -107,6 +112,10 @@ public class PaymentService {
     /**
  * Update payment
  */
+@Audit(
+        module = "Payment",
+        action = "UPDATE"
+)
 public PaymentResponse updatePayment(Long id, PaymentRequest request) {
 
     Objects.requireNonNull(id, "Payment id must not be null");
@@ -164,6 +173,10 @@ public PaymentResponse updatePayment(Long id, PaymentRequest request) {
 /**
  * Delete payment
  */
+@Audit(
+        module = "Payment",
+        action = "DELETE"
+)
 public void deletePayment(Long id) {
 
     Objects.requireNonNull(id, "Payment id must not be null");

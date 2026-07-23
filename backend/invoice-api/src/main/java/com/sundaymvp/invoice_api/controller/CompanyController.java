@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -80,6 +81,19 @@ public class CompanyController {
 
         return ResponseEntity.ok(
                 companyService.updateCompany(id, request));
+    }
+
+        /**
+     * Upload company logo
+     */
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    @PostMapping("/{id}/logo")
+    public ResponseEntity<CompanyResponse> uploadCompanyLogo(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok(
+                companyService.uploadLogo(id, file));
     }
 
     /**

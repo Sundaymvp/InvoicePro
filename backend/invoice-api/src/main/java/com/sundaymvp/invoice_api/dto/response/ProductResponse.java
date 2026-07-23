@@ -8,6 +8,7 @@ public class ProductResponse {
     private String category;
     private String sku;
     private String barcode;
+    private String image;
     private Double costPrice;
     private Double sellingPrice;
     private Integer quantity;
@@ -19,7 +20,7 @@ public class ProductResponse {
 
     public ProductResponse(Long id, String name, String description,
                            String category, String sku, String barcode,
-                           Double costPrice, Double sellingPrice,
+                           String image, Double costPrice, Double sellingPrice,
                            Integer quantity, String unit,
                            Boolean status) {
 
@@ -29,6 +30,7 @@ public class ProductResponse {
         this.category = category;
         this.sku = sku;
         this.barcode = barcode;
+        this.image = image;
         this.costPrice = costPrice;
         this.sellingPrice = sellingPrice;
         this.quantity = quantity;
@@ -82,6 +84,14 @@ public class ProductResponse {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
+    }
+
+    public String getImage() {
+    return image;
+    }
+
+    public void setImage(String image) {
+    this.image = image;
     }
 
     public Double getCostPrice() {

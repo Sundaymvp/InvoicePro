@@ -7,18 +7,20 @@ public class UserResponse {
     private String lastName;
     private String email;
     private String phone;
+    private String profileImage;
     private String role;
 
     public UserResponse() {
     }
 
     public UserResponse(Long id, String firstName, String lastName,
-                        String email, String phone, String role) {
+                        String email, String phone, String profileImage, String role) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
+        this.profileImage = profileImage;
         this.role = role;
     }
 
@@ -60,6 +62,14 @@ public class UserResponse {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getProfileImage() {
+    return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+    this.profileImage = profileImage;
     }
 
     public String getRole() {

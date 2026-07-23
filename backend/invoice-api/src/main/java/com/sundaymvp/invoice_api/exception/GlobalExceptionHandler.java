@@ -57,4 +57,25 @@ public ResponseEntity<ErrorResponse> handleDeleteNotAllowed(
 
     return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
 }
+
+    /**
+     * Handle file storage exceptions
+     */
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<ErrorResponse> handleFileStorageException(
+            FileStorageException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse error = new ErrorResponse();
+
+        error.setTimestamp(LocalDateTime.now());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setError("File Storage Error");
+        error.setMessage(ex.getMessage());
+        error.setPath(request.getRequestURI());
+
+        return new ResponseEntity<>(
+                error,
+                HttpStatus.BAD_REQUEST);
+    }
 }

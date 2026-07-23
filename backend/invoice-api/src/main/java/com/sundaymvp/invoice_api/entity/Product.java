@@ -27,6 +27,9 @@ public class Product {
     @Column(unique = true)
     private String barcode;
 
+    @Column(length = 255)
+    private String image;
+
     private Double costPrice;
 
     private Double sellingPrice;
@@ -48,6 +51,7 @@ public class Product {
             String category,
             String sku,
             String barcode,
+            String image,
             Double costPrice,
             Double sellingPrice,
             Integer quantity,
@@ -61,6 +65,7 @@ public class Product {
         this.category = category;
         this.sku = sku;
         this.barcode = barcode;
+        this.image = image;
         this.costPrice = costPrice;
         this.sellingPrice = sellingPrice;
         this.quantity = quantity;
@@ -122,6 +127,14 @@ public class Product {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
+    }
+
+    public String getImage() {
+    return image;
+    }
+
+    public void setImage(String image) {
+    this.image = image;
     }
 
     public Double getCostPrice() {

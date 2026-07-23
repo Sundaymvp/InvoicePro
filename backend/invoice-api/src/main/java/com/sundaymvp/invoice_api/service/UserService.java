@@ -14,6 +14,7 @@ import com.sundaymvp.invoice_api.repository.RoleRepository;
 import com.sundaymvp.invoice_api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,16 +26,19 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
 
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        CompanyRepository companyRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       FileStorageService fileStorageService) {
 
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.companyRepository = companyRepository;
         this.passwordEncoder = passwordEncoder;
+        this.fileStorageService = fileStorageService;
     }
 
     public UserResponse createUser(RegisterRequest request) {
@@ -80,6 +84,38 @@ public class UserService {
 
         return UserMapper.toResponse(user);
     }
+
+    /**
+ * Upload user profile image.
+ */
+public UserResponse uploadProfileImage(
+        Long userId,
+        MultipartFile file) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() ->
+                    new UserNotFoundException("User not found."));
+
+    // Delete old profile image
+    if (user.getProfileImage() != null
+            && !user.getProfileImage().isBlank()) {
+
+        fileStorageService.deleteFile(
+                "profile-images",
+                user.getProfileImage());
+    }
+
+    // Upload new profile image
+    String fileName = fileStorageService.uploadFile(
+            file,
+            "profile-images");
+
+    user.setProfileImage(fileName);
+
+    User updatedUser = userRepository.save(user);
+
+    return UserMapper.toResponse(updatedUser);
+}
 
     public void deleteUser(Long id) {
 

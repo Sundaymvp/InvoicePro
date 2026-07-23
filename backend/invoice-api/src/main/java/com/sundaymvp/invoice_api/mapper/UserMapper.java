@@ -22,6 +22,7 @@ public class UserMapper {
         response.setLastName(user.getLastName());
         response.setEmail(user.getEmail());
         response.setPhone(user.getPhone());
+        response.setProfileImage(user.getProfileImage());
 
         if (user.getRole() != null) {
             response.setRole(user.getRole().getName().name());

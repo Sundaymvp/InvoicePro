@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -62,6 +63,22 @@ public class UserController {
         return ResponseEntity.ok(
                 userService.getUserById(id)
         );
+    }
+
+    /**
+     * Upload user profile image
+    */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/profile-image")
+    public ResponseEntity<UserResponse> uploadProfileImage(
+
+        @PathVariable Long id,
+
+        @RequestParam("file") MultipartFile file) {
+
+    return ResponseEntity.ok(
+            userService.uploadProfileImage(id, file)
+    );
     }
 
 

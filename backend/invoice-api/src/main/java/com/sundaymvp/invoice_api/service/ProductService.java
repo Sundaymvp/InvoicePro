@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,11 +25,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CompanyRepository companyRepository;
+    private final FileStorageService fileStorageService;
 
     public ProductService(ProductRepository productRepository,
-                          CompanyRepository companyRepository) {
+                          CompanyRepository companyRepository,
+                          FileStorageService fileStorageService) {
         this.productRepository = productRepository;
         this.companyRepository = companyRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -143,6 +147,45 @@ public class ProductService {
 
         return ProductMapper.toResponse(updatedProduct);
     }
+
+    /**
+ * Upload product image.
+ */
+@Audit(
+        module = "Product",
+        action = "UPLOAD IMAGE"
+)
+public ProductResponse uploadProductImage(
+        Long productId,
+        MultipartFile file) {
+
+    Objects.requireNonNull(productId, "Product id must not be null");
+    Objects.requireNonNull(file, "File must not be null");
+
+    Product product = productRepository.findById(productId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Product not found"));
+
+    // Delete old image
+    if (product.getImage() != null
+            && !product.getImage().isBlank()) {
+
+        fileStorageService.deleteFile(
+                "product-images",
+                product.getImage());
+    }
+
+    // Upload new image
+    String fileName = fileStorageService.uploadFile(
+            file,
+            "product-images");
+
+    product.setImage(fileName);
+
+    Product updatedProduct = productRepository.save(product);
+
+    return ProductMapper.toResponse(updatedProduct);
+}
 
     /**
      * Delete product.

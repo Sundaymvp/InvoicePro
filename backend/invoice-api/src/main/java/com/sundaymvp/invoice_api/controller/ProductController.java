@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/products")
@@ -157,6 +158,20 @@ public class ProductController {
         return ResponseEntity.ok(
                 productService.updateProduct(id, request));
     }
+
+    /**
+ * Upload product image.
+ */
+@PostMapping("/{id}/image")
+public ResponseEntity<ProductResponse> uploadProductImage(
+
+        @PathVariable Long id,
+
+        @RequestParam("file") MultipartFile file) {
+
+    return ResponseEntity.ok(
+            productService.uploadProductImage(id, file));
+}
 
     /**
      * Delete product.
